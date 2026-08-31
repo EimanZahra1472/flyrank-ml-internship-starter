@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 360" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Title & Subtitle -->
+  <text x="40" y="45" font-size="18" font-weight="700" fill="#1e293b">Deployed Action Playbook: Candidate Queue Breakdown</text>
+  <text x="40" y="70" font-size="13" fill="#64748b">March 2026 Warehouse Snapshot | Total Actionable Candidates: 59 Pages</text>
+
+  <!-- Horizontal Bars Container -->
+  <g transform="translate(40, 100)">
+    <!-- Category 1: STALE_LOW_CTR -->
+    <text x="0" y="30" font-size="14" font-weight="600" fill="#334155">STALE_LOW_CTR</text>
+    <text x="0" y="48" font-size="11" fill="#64748b">Aged content (≥90d), impressions ≥20, low click capture</text>
+    <rect x="0" y="58" width="550" height="36" rx="6" fill="#f1f5f9" />
+    <rect x="0" y="58" width="438" height="36" rx="6" fill="#2563eb" />
+    <text x="450" y="82" font-size="15" font-weight="700" fill="#1e3a8a">47 pages (79.7%)</text>
+
+    <!-- Category 2: PAGE1_LOW_CTR -->
+    <text x="0" y="135" font-size="14" font-weight="600" fill="#334155">PAGE1_LOW_CTR</text>
+    <text x="0" y="153" font-size="11" fill="#64748b">Position ≤ 10 on Google, CTR &lt; 0.5% (High-value SERP under-capture)</text>
+    <rect x="0" y="163" width="550" height="36" rx="6" fill="#f1f5f9" />
+    <rect x="0" y="163" width="112" height="36" rx="6" fill="#0d9488" />
+    <text x="124" y="187" font-size="15" font-weight="700" fill="#115e59">12 pages (20.3%)</text>
+  </g>
+
+  <!-- Key Operational Takeaway Footer -->
+  <rect x="40" y="300" width="670" height="36" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+  <text x="55" y="323" font-size="12" fill="#475569"><tspan font-weight="700" fill="#0f172a">Action Mandate:</tspan> All 59 flagged pages routed to human editorial review for targeted snippet updates or content expansion.</text>
+</svg>

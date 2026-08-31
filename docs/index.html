@@ -3,43 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Honest ML & Decision Support for Search Content Refresh Prioritization</title>
-  <meta name="description" content="Research paper evaluating rule-based baselines, current-window classifiers, and forward-looking time-series models on 30K pages and 78.8M warehouse records from FlyRank.">
-  
-  <!-- Modern Typography from Google Fonts -->
+  <title>Content Opportunity Scoring &amp; Honest Validation in Enterprise Search Intelligence | FlyRank ML Research</title>
+  <meta name="description" content="A research paper evaluating heuristic rules, machine learning classifiers, and out-of-period temporal validation on 78.8M search performance records for content refresh prioritization.">
+  <meta name="author" content="Eiman Zahra">
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --primary-light: #eff6ff;
-      --accent: #0f172a;
-      --accent-muted: #475569;
-      --bg: #ffffff;
-      --bg-alt: #f8fafc;
-      --bg-card: #ffffff;
-      --border: #e2e8f0;
-      --border-subtle: #f1f5f9;
-      --success: #059669;
-      --success-bg: #ecfdf5;
-      --warning: #d97706;
-      --warning-bg: #fffbeb;
-      --danger: #dc2626;
-      --danger-bg: #fef2f2;
-      --info: #0284c7;
-      --info-bg: #f0f9ff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-serif: 'Newsreader', Georgia, serif;
       --font-mono: 'JetBrains Mono', monospace;
-      --radius: 12px;
+
+      --bg-primary: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-code: #0f172a;
+      
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --primary-600: #2563eb;
+      --primary-700: #1d4ed8;
+      --primary-50: #eff6ff;
+
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --amber-border: #fde68a;
+
+      --rose-600: #e11d48;
+      --rose-50: #fff1f2;
+      --rose-border: #fecdd3;
+
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
     }
 
     * {
@@ -49,831 +58,736 @@
     }
 
     body {
-      font-family: var(--font-main);
-      color: var(--text);
-      background-color: var(--bg);
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
       line-height: 1.7;
-      font-size: 16px;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Top Navigation / Header */
-    .top-nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0.75rem 1.5rem;
-    }
-
-    .nav-container {
-      max-width: 1060px;
+    .page-wrapper {
+      max-width: 960px;
       margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 40px 24px 80px 24px;
     }
 
-    .nav-brand {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
+    header.paper-header {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 48px 40px;
+      margin-bottom: 36px;
+      box-shadow: var(--shadow-sm);
     }
 
-    .nav-badge {
-      background: var(--primary-light);
-      color: var(--primary);
-      font-size: 0.75rem;
-      padding: 0.15rem 0.6rem;
-      border-radius: 9999px;
-      font-weight: 600;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1.25rem;
-      align-items: center;
-    }
-
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: color 0.15s;
-    }
-
-    .nav-links a:hover {
-      color: var(--primary);
-    }
-
-    .nav-btn {
-      background: var(--accent);
-      color: white !important;
-      padding: 0.4rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.15s;
-    }
-
-    .nav-btn:hover {
-      background: #334155;
-    }
-
-    /* Main Container Layout */
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 6rem;
-    }
-
-    /* Header & Abstract */
-    .paper-header {
-      margin-bottom: 3.5rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 2.5rem;
-    }
-
-    .paper-meta {
+    .badge-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 10px;
       align-items: center;
-      margin-bottom: 1.5rem;
-      font-size: 0.875rem;
-      color: var(--text-muted);
+      margin-bottom: 20px;
     }
 
-    .meta-tag {
-      background: var(--bg-alt);
-      border: 1px solid var(--border);
-      padding: 0.2rem 0.65rem;
-      border-radius: 6px;
-      font-weight: 500;
-      color: var(--accent-muted);
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
+    .badge-blue { background: var(--primary-50); color: var(--primary-700); border: 1px solid #bfdbfe; }
+    .badge-emerald { background: var(--emerald-50); color: var(--emerald-600); border: 1px solid var(--emerald-border); }
+    .badge-slate { background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
 
     h1.paper-title {
+      font-family: var(--font-serif);
       font-size: 2.35rem;
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1.25;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
     }
 
     .paper-subtitle {
       font-size: 1.15rem;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
-      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      font-weight: 400;
+    }
+
+    .author-block {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .author-info strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .header-links a {
+      color: var(--primary-600);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .header-links a:hover {
+      text-decoration: underline;
     }
 
     .abstract-box {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      border: 1px solid #cbd5e1;
-      border-left: 4px solid var(--primary);
-      border-radius: var(--radius);
-      padding: 1.75rem;
-      margin: 2rem 0 1rem;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 2px solid #cbd5e1;
+      border-left: 6px solid var(--primary-600);
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 40px;
       box-shadow: var(--shadow-sm);
     }
 
-    .abstract-label {
-      font-size: 0.8rem;
-      font-weight: 800;
+    .abstract-box h2 {
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--primary-dark);
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
+      font-weight: 700;
+      color: var(--primary-700);
+      margin-bottom: 14px;
     }
 
     .abstract-text {
-      font-size: 1.025rem;
-      color: #334155;
+      font-family: var(--font-serif);
+      font-size: 1.12rem;
       line-height: 1.75;
-      font-weight: 450;
+      color: #1e293b;
     }
 
-    /* Section Styling */
-    section {
-      margin-bottom: 4rem;
-      scroll-margin-top: 5rem;
+    article.paper-body {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 48px 48px;
+      box-shadow: var(--shadow-sm);
     }
 
-    h2 {
+    section.paper-section {
+      margin-bottom: 52px;
+      scroll-margin-top: 40px;
+    }
+    section.paper-section:last-of-type {
+      margin-bottom: 0;
+    }
+
+    h2.section-heading {
       font-size: 1.55rem;
       font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 1.25rem;
-      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border-subtle);
+      gap: 12px;
+      letter-spacing: -0.01em;
     }
 
     .section-num {
-      color: var(--primary);
-      font-size: 1.25rem;
-      font-weight: 800;
+      color: var(--primary-600);
       font-family: var(--font-mono);
+      font-size: 1.15rem;
     }
 
-    h3 {
-      font-size: 1.2rem;
-      font-weight: 650;
-      color: var(--accent);
-      margin: 1.75rem 0 0.75rem;
+    h3.sub-heading {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 24px 0 12px 0;
     }
 
     p {
-      margin-bottom: 1.25rem;
-      color: #334155;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+      font-size: 1rem;
     }
 
-    /* Figures & Visuals */
-    .figure-container {
-      margin: 2rem 0;
-      background: var(--bg-alt);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem;
+    .table-container {
+      overflow-x: auto;
+      margin: 24px 0;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--bg-surface);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-strong);
+    }
+
+    table.data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr.highlight-row {
+      background: var(--emerald-50);
+      font-weight: 600;
+    }
+    table.data-table tr.highlight-row td {
+      color: var(--emerald-600);
+    }
+
+    table.data-table tr.danger-row {
+      background: var(--rose-50);
+      font-weight: 600;
+    }
+    table.data-table tr.danger-row td {
+      color: var(--rose-600);
+    }
+
+    .callout {
+      padding: 20px 24px;
+      border-radius: 8px;
+      margin: 24px 0;
+      font-size: 0.95rem;
+    }
+    .callout-info {
+      background: var(--primary-50);
+      border-left: 4px solid var(--primary-600);
+      color: #1e3a8a;
+    }
+    .callout-warning {
+      background: var(--amber-50);
+      border-left: 4px solid var(--amber-600);
+      color: #78350f;
+    }
+    .callout-danger {
+      background: var(--rose-50);
+      border-left: 4px solid var(--rose-600);
+      color: #881337;
+    }
+    .callout-success {
+      background: var(--emerald-50);
+      border-left: 4px solid var(--emerald-600);
+      color: #064e3b;
+    }
+    .callout strong {
+      font-weight: 700;
+    }
+
+    .figure-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 28px 0;
       text-align: center;
       box-shadow: var(--shadow-sm);
     }
 
-    .figure-img {
+    .figure-card svg,
+    .figure-card img {
       max-width: 100%;
       height: auto;
-      border-radius: 8px;
-      display: block;
-      margin: 0 auto;
-      background: white;
-      box-shadow: var(--shadow-sm);
+      border-radius: 6px;
     }
 
     .figure-caption {
-      margin-top: 1rem;
-      font-size: 0.9rem;
+      margin-top: 14px;
+      font-size: 0.88rem;
       color: var(--text-muted);
-      text-align: left;
-      border-top: 1px solid var(--border);
-      padding-top: 0.75rem;
-      line-height: 1.5;
+      text-align: center;
     }
-
     .figure-caption strong {
-      color: var(--accent);
+      color: var(--text-primary);
     }
 
-    /* Key Finding Callouts */
-    .callout {
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      margin: 1.75rem 0;
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-      line-height: 1.6;
-      font-size: 0.95rem;
-    }
-
-    .callout-icon {
-      font-size: 1.25rem;
-      flex-shrink: 0;
-      margin-top: 0.1rem;
-    }
-
-    .callout.danger {
-      background: var(--danger-bg);
-      border: 1px solid #fecaca;
-      color: #991b1b;
-    }
-
-    .callout.info {
-      background: var(--info-bg);
-      border: 1px solid #bae6fd;
-      color: #0369a1;
-    }
-
-    .callout.success {
-      background: var(--success-bg);
-      border: 1px solid #a7f3d0;
-      color: #065f46;
-    }
-
-    .callout.warning {
-      background: var(--warning-bg);
-      border: 1px solid #fde68a;
-      color: #92400e;
-    }
-
-    /* Tables */
-    .table-wrapper {
-      overflow-x: auto;
-      margin: 1.75rem 0;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: white;
-      box-shadow: var(--shadow-sm);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.925rem;
-      text-align: left;
-    }
-
-    th {
-      background: var(--bg-alt);
-      color: var(--accent);
-      font-weight: 700;
-      padding: 0.85rem 1.1rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    td {
-      padding: 0.85rem 1.1rem;
-      border-bottom: 1px solid var(--border-subtle);
-      color: #334155;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background: #f8fafc;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.2rem 0.55rem;
-      border-radius: 6px;
-      font-size: 0.775rem;
-      font-weight: 600;
-      font-family: var(--font-mono);
-    }
-
-    .badge-success { background: #dcfce7; color: #166534; }
-    .badge-primary { background: #dbeafe; color: #1e40af; }
-    .badge-danger { background: #fee2e2; color: #991b1b; }
-    .badge-warning { background: #fef3c7; color: #92400e; }
-    .badge-neutral { background: #f1f5f9; color: #475569; }
-
-    /* Code Snippets */
     pre, code {
       font-family: var(--font-mono);
     }
-
-    code:not(pre code) {
-      background: #f1f5f9;
+    code.inline-code {
+      background: var(--bg-surface-elevated);
       color: #0f172a;
-      padding: 0.15rem 0.4rem;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.875em;
-      border: 1px solid #e2e8f0;
+      font-size: 0.88em;
+      border: 1px solid var(--border-subtle);
     }
-
-    .code-block {
-      background: #0f172a;
+    pre.code-block {
+      background: var(--bg-code);
       color: #e2e8f0;
-      padding: 1.25rem;
-      border-radius: var(--radius);
+      padding: 20px 24px;
+      border-radius: 8px;
       overflow-x: auto;
-      font-size: 0.875rem;
+      font-size: 0.88rem;
       line-height: 1.6;
-      margin: 1.5rem 0;
-      box-shadow: var(--shadow-md);
+      margin: 20px 0;
     }
 
-    /* Formula Box */
-    .formula-card {
-      background: var(--bg-alt);
-      border: 1px solid var(--border);
-      border-left: 4px solid #6366f1;
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      margin: 1.5rem 0;
-      font-family: var(--font-mono);
-      font-size: 0.95rem;
-      color: #1e293b;
+    ul.check-list, ol.num-list {
+      margin: 16px 0 20px 24px;
+      color: var(--text-secondary);
+    }
+    ul.check-list li, ol.num-list li {
+      margin-bottom: 10px;
     }
 
-    /* Lists */
-    ul, ol {
-      margin-left: 1.5rem;
-      margin-bottom: 1.25rem;
-      color: #334155;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-    }
-
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 3rem 0;
+    footer.paper-footer {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border-subtle);
+      text-align: center;
+      font-size: 0.88rem;
       color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 4rem;
-      background: var(--bg-alt);
     }
-
-    .footer-content {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
-
-    .footer-links a {
-      color: var(--primary);
+    footer.paper-footer a {
+      color: var(--primary-600);
       text-decoration: none;
-      font-weight: 500;
     }
 
-    .footer-links a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-      h1.paper-title {
-        font-size: 1.85rem;
-      }
-      .container {
-        padding-top: 2rem;
-      }
-      .nav-links {
-        display: none;
-      }
+      .page-wrapper { padding: 20px 14px; }
+      header.paper-header { padding: 30px 20px; }
+      article.paper-body { padding: 30px 20px; }
+      h1.paper-title { font-size: 1.85rem; }
+      .abstract-box { padding: 24px 20px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
-  <header class="top-nav" id="top-nav">
-    <div class="nav-container">
-      <a href="#top" class="nav-brand">
-        <span>FlyRank Research</span>
-        <span class="nav-badge">ML-11 Deployed Paper</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#abstract">Abstract</a>
-        <a href="#data">Data</a>
-        <a href="#methodology">Methodology</a>
-        <a href="#results">Results</a>
-        <a href="#limitations">Limitations</a>
-        <a href="#recommendations">Playbook</a>
-        <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter" target="_blank" rel="noopener noreferrer" class="nav-btn">GitHub Repo</a>
-      </nav>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="paper-header">
+    <div class="badge-bar">
+      <span class="badge badge-blue">Research Paper</span>
+      <span class="badge badge-emerald">Machine Learning Capstone</span>
+      <span class="badge badge-slate">ML-11 Deployed</span>
+    </div>
+    <h1 class="paper-title">Content Opportunity Scoring &amp; Honest Validation in Enterprise Search Intelligence</h1>
+    <div class="paper-subtitle">A multi-phase empirical evaluation of heuristic rules, supervised classifiers, and out-of-period temporal validation on 78.8 million search performance records.</div>
+    <div class="author-block">
+      <div class="author-info">
+        <strong>Eiman Zahra</strong> &bull; Applied Search Intelligence Track &bull; August 2026
+      </div>
+      <div class="header-links">
+        <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          View GitHub Repository
+        </a>
+      </div>
     </div>
   </header>
 
-  <main class="container" id="top">
-    <!-- Paper Header & Meta -->
-    <header class="paper-header">
-      <div class="paper-meta">
-        <span class="meta-tag">Research Paper</span>
-        <span class="meta-tag">Applied Search Intelligence</span>
-        <span class="meta-tag">Date: August 2026</span>
-        <span class="meta-tag">Author: Eiman Zahra</span>
-      </div>
-      
-      <h1 class="paper-title">Honest Machine Learning & Decision Support for Search Content Refresh Prioritization</h1>
-      <p class="paper-subtitle">A multi-phase empirical study evaluating heuristic baselines, current-window classifiers, and forward-looking time-series models on 30,000 enterprise pages and 78.8M warehouse records.</p>
-      
-      <!-- Section 1: Abstract -->
-      <div class="abstract-box" id="abstract">
-        <div class="abstract-label">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-          1. Title & Abstract
-        </div>
-        <p class="abstract-text">
-          Prioritizing content inventory for manual editorial refresh under finite operational capacity requires identifying pages experiencing real performance decline without wasting review bandwidth on healthy URLs. Using an anonymized 30,000-page dataset across 32 enterprise clients alongside a 78.8M-row daily performance warehouse from FlyRank, we evaluated rule-based heuristics, current-window classifiers, and forward-looking time-series predictive models. In client-holdout validation on the 30K dataset, Logistic Regression achieved a Precision@20 of 0.700 and Precision@50 of 0.600 against a base decline rate of 0.511, outperforming a volume-weighted baseline rule (Precision@20 = 0.400, Precision@50 = 0.420). However, when evaluating a forward-looking predictive model on the full warehouse, honest time-aware validation caused accuracy to collapse from 0.669 (naive random split) to 0.274, exacerbated by severe autocorrelation (r = 0.819) between historical position and the target outcome. Consequently, we rejected the predictive model for deployment, implementing instead an evidence-backed, transparent action playbook with structured reason codes (<code>STALE_LOW_CTR</code> and <code>PAGE1_LOW_CTR</code>) to govern human-in-the-loop content refresh queues safely.
-        </p>
-      </div>
-    </header>
+  <!-- Abstract (Canonical Section 1: Title + Abstract) -->
+  <div class="abstract-box">
+    <h2>Abstract</h2>
+    <div class="abstract-text">
+      How can content teams reliably prioritize which existing search content to refresh under strict editorial capacity constraints? Using FlyRank's 30,000-page client dataset (32 clients) and 78.8M-row daily performance warehouse, we evaluated heuristic rules, supervised classifiers, and forward-looking time-series models for content decline triage. On client-grouped holdout splits (80/20, 7 test clients), Logistic Regression achieved <strong>Precision@20 = 0.700</strong> and <strong>Precision@50 = 0.600</strong>, significantly outperforming the volume-based baseline rule (Precision@20 = 0.400, Precision@50 = 0.420) and the 0.511 base rate. However, a forward-looking predictive model attempted on warehouse daily facts collapsed under honest time-aware out-of-period testing (<strong>66.9% &rarr; 27.4% accuracy</strong>) due to an 0.819 position autocorrelation near-leakage trap. Consequently, we killed the predictive model and deployed a transparent, re-validated action playbook that outputs a 59-page triage queue with verifiable reason codes (<code class="inline-code">STALE_LOW_CTR</code>, <code class="inline-code">PAGE1_LOW_CTR</code>) to guide human editorial review without automated publishing risks.
+    </div>
+  </div>
+
+  <!-- Paper Body Articles -->
+  <article class="paper-body">
 
     <!-- Section 2: Introduction / Problem Statement -->
-    <section id="introduction">
-      <h2><span class="section-num">02.</span> Introduction & Problem Statement</h2>
+    <section class="paper-section" id="introduction">
+      <h2 class="section-heading"><span class="section-num">2.</span> Introduction &amp; Problem Statement</h2>
       <p>
-        Organic search traffic represents a primary distribution channel for digital enterprises, yet mature content libraries naturally decay over time as search intent evolves, competitive content emerges, and algorithmic SERP layouts shift. Content marketing and SEO teams face an operational bottleneck: while an enterprise portfolio may encompass tens of thousands of published URLs, editorial teams have capacity to thoroughly audit, rewrite, and optimize only <strong>20 to 50 pages per weekly sprint</strong>.
+        In enterprise content management, organizations maintain libraries spanning tens of thousands of published URLs. Over time, search traffic distributions shift: algorithm updates, user intent changes, and competitive decay gradually erode page visibility. However, human editorial capacity is fundamentally scarce. An editorial team can typically inspect and update only <strong>20 to 50 pages per monthly cycle</strong>.
       </p>
       <p>
-        In current industry practice, prioritization is frequently driven by simplistic heuristics—such as ranking pages purely by raw traffic volume or flagging any URL untouched for over 180 days. These naive rules create two costly failure modes:
+        Without principled triage, organizations commonly rely on arbitrary heuristics—most notably "staleness" rules that flag any page unedited for 180+ days. This approach creates severe operational friction:
       </p>
-      <ul>
-        <li><strong>False Positives (High Opportunity Cost):</strong> Editorial teams waste scarce creative bandwidth refreshing pages that are already holding steady in their ranking distribution, yielding negligible incremental traffic return.</li>
-        <li><strong>False Negatives (Compounding Decay):</strong> High-potential URLs undergoing silent decay go unnoticed until their rankings fall off Page 1, where recovery requires exponentially more link equity and structural revision.</li>
+      <ul class="check-list">
+        <li><strong>High False Positive Cost:</strong> Editors waste domain-expert hours reviewing healthy, high-ranking pages that happen to be old.</li>
+        <li><strong>High False Negative Cost:</strong> High-demand pages undergoing active decay are overlooked because they were recently modified or lack explicit age flags.</li>
       </ul>
       <p>
-        This research addresses a specific decision-support question: <em>Given fixed weekly review capacity, how can observable search performance signals be combined to construct a high-precision triage queue that maximizes the proportion of truly declining pages presented to human reviewers?</em>
+        The objective of this research is not to build autonomous publishing bots or claim insight into proprietary search engine algorithms. Rather, it is to build a robust <strong>decision-support system</strong> that ingests observable search signals and outputs an evidence-backed, prioritized triage queue evaluated on <strong>Precision@K</strong>.
       </p>
     </section>
 
     <!-- Section 3: Data -->
-    <section id="data">
-      <h2><span class="section-num">03.</span> Data</h2>
+    <section class="paper-section" id="data">
+      <h2 class="section-heading"><span class="section-num">3.</span> Data &amp; Safety Discipline</h2>
       <p>
-        This study utilizes two distinct, approved observational datasets provided through the FlyRank Applied Search Intelligence track:
+        This research builds upon two datasets provided by FlyRank, both consisting strictly of observable search, analytics, and content metadata:
       </p>
-      <div class="table-wrapper">
-        <table>
+      
+      <div class="table-container">
+        <table class="data-table">
           <thead>
             <tr>
               <th>Dataset Release</th>
-              <th>Grain & Size</th>
+              <th>Grain &amp; Volume</th>
               <th>Date Window</th>
-              <th>Intended Scope & Role</th>
+              <th>Primary Research Role</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Starter Anonymized Dataset</strong><br><code>content_refresh_anonymized.csv</code></td>
-              <td>30,000 pseudonymized URLs<br>(44 columns, 32 clients)</td>
-              <td>Trailing 90-day aggregate snapshot</td>
-              <td>Initial task framing (ML-02–04), baseline heuristic development (ML-07), and client-holdout model benchmarking (ML-08).</td>
+              <td><strong>Starter Teaching Slice</strong><br><code class="inline-code">content_refresh_anonymized.csv</code></td>
+              <td>30,000 rows &times; 44 columns<br>(32 pseudonymized clients)</td>
+              <td>Fixed 90-day trailing export window</td>
+              <td>Initial proxy modeling (ML-08), baseline benchmarking, client-holdout validation.</td>
             </tr>
             <tr>
-              <td><strong>Full Enterprise Warehouse</strong><br><code>FlyRank/internship-warehouse</code></td>
-              <td>78.8M daily performance rows<br>(28.9M active GSC impressions)</td>
-              <td>February 1, 2026 – June 30, 2026<br>(Multi-month longitudinal fact tables)</td>
-              <td>Longitudinal time-aware validation audit (ML-09) and warehouse-scale action queue deployment (ML-10).</td>
+              <td><strong>Warehouse Parquet Release</strong><br><code class="inline-code">FlyRank/internship-warehouse</code></td>
+              <td>78,835,655 daily fact rows<br>519,606 content items, 104 clients</td>
+              <td>2025-01-27 through 2026-06-30<br>(3-day freshness cutoff)</td>
+              <td>Data contract verification (ML-04), time-aware forward validation audit (ML-09), production action playbook (ML-10).</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3>Filtering Criteria & Public Safety Sanitization</h3>
+      <h3 class="sub-heading">Public-Safety Guarantees &amp; Leakage Rules</h3>
       <p>
-        In accordance with data governance rules (<code>DATA_USE.md</code>), both datasets were strictly sanitized to maintain public safety and client anonymity:
+        In accordance with <code class="inline-code">DATA_USE.md</code>, all data utilized in this study is thoroughly pseudonymized:
       </p>
-      <ul>
-        <li><strong>Zero Private Identifiers:</strong> No client names, domain names, URLs, page titles, or raw search queries are present. All entities are represented by 64-bit cryptographic hash identifiers (e.g., <code>client_73cda7b4e4f265ea</code>, <code>content_b7e512995f79d5a6</code>).</li>
-        <li><strong>Volume & Age Filtering:</strong> Restricted to established pages with non-zero historical visibility: <code>impressions_90d > 0</code> and <code>content_age_days >= 90</code> (all 30,000 rows in the starter slice satisfy this floor).</li>
-        <li><strong>Rate Standardization:</strong> All rate columns (<code>ctr</code>, <code>engagement_rate</code>, <code>scroll_rate</code>, <code>trend_pct</code>) are standardized on a 0–100 percentage scale (e.g., <code>ctr = 0.76</code> denotes 0.76%).</li>
-        <li><strong>Observable Signals Only:</strong> Models are trained exclusively on observable search traffic, position distributions, and engagement totals—excluding proprietary product decision flags.</li>
+      <ul class="check-list">
+        <li><strong>Zero Private Identifiers:</strong> No client names, domain names, URLs, page titles, or raw search queries exist in the dataset. All IDs (<code class="inline-code">content_id</code>, <code class="inline-code">client_id</code>) are cryptographic hashes used exclusively for joins and splits.</li>
+        <li><strong>Explicit Exclusions:</strong> Feature sets strictly barred <code class="inline-code">trend_direction</code> and <code class="inline-code">trend_pct</code> (as the current-window decline target is derived from them). AI referral sessions were excluded from classifier training due to extreme sparsity (only 30,177 rows out of 78.8M total fact rows).</li>
+        <li><strong>Scale Masking Discovery (ML-04):</strong> During data contract verification, we demonstrated that adding unscaled leaky features can mask severe leakage in regularized linear models (AUC 0.802 &rarr; 0.999 upon standardization), confirming that standardized feature audits are essential for leakage prevention.</li>
       </ul>
     </section>
 
     <!-- Section 4: Methodology -->
-    <section id="methodology">
-      <h2><span class="section-num">04.</span> Methodology</h2>
-      
-      <h3>4.1 Task Formulation & Label Definitions</h3>
+    <section class="paper-section" id="methodology">
+      <h2 class="section-heading"><span class="section-num">4.</span> Methodology &amp; Validation Design</h2>
       <p>
-        We formulated the prioritization problem across two progressive paradigms:
+        The investigation progressed across three distinct methodological stages:
       </p>
-      <ol>
-        <li>
-          <strong>Current-Window Decline Classification (ML-08):</strong> Binary label derived from impression trajectories:
-          <code>is_declining_label = (trend_direction == "down")</code>. A page is classified as declining (1) if impressions in the most recent 30-day window dropped by &gt;20% compared to the prior 30-day window (days 31–60 back), and non-declining (0) otherwise. Across the 30,000-page starter slice, <strong>16,262 pages (54.2% base rate)</strong> exhibited decline.
-        </li>
-        <li>
-          <strong>Forward-Looking Time-Series Prediction (ML-09):</strong> Binary label evaluating future rank degradation:
-          <code>declined = (future_avg_position > avg_position)</code>, where features are aggregated over calendar month $T$ and the outcome is observed in calendar month $T+1$ from warehouse daily facts.
-        </li>
-      </ol>
 
-      <h3>4.2 Transparent Baseline Rule</h3>
+      <h3 class="sub-heading">1. Current-Window Classifier Formulation (ML-08)</h3>
       <p>
-        To establish an honest performance floor, we constructed a transparent heuristic combining search position expectations and traffic volume:
+        On the starter dataset (30,000 rows filtered to <code class="inline-code">impressions_90d &gt; 0</code> and <code class="inline-code">content_age_days &ge; 90</code>), we formulated a supervised classification task predicting whether a page is currently declining:
       </p>
-      <div class="formula-card">
-        Baseline Score = Below_Tier_Avg_CTR × Visible_Flag × Impressions_90d
-        <br><br>
-        where:<br>
-        • Position Tiers: [1–3], [4–10], [11–20], [21+]<br>
-        • Below_Tier_Avg_CTR = 1 if CTR &lt; mean(CTR for that position tier), else 0<br>
-        • Visible_Flag = 1 if Impressions_90d &ge; 500, else 0
-      </div>
+      <pre class="code-block"><code>is_declining_label = 1 if (trend_direction == "down") else 0
+# Base decline rate across 30,000 pages = 54.2% (16,262 declining pages)</code></pre>
+      <p>
+        We evaluated models using <strong>Client-Grouped Validation</strong> (<code class="inline-code">GroupShuffleSplit</code>, 80% train / 20% test, <code class="inline-code">random_state=42</code>). The split allocated 23,837 rows across 25 clients to training, and 6,163 rows across 7 clients to testing, with <strong>zero client overlap</strong>. This prevents models from memorizing domain-specific styles.
+      </p>
 
-      <h3>4.3 Validation Architecture & Split Designs</h3>
+      <h3 class="sub-heading">2. The Heuristic Baseline Rule (ML-07)</h3>
       <p>
-        To test for true generalization, validation was structured to prevent data leakage:
+        We tested FlyRank's underlying assumptions:
       </p>
-      <ul>
-        <li><strong>Grouped Client-Holdout Split (ML-08):</strong> Standard row-random splitting allows models to memorize idiosyncratic client baselines. Using <code>GroupShuffleSplit(test_size=0.2, random_state=42)</code>, the 32 clients were partitioned into 25 training clients (23,837 pages) and 7 held-out evaluation clients (6,163 pages). No client appeared in both splits.</li>
-        <li><strong>Out-of-Time Longitudinal Split (ML-09):</strong> Models were trained on historical transitions (February $\to$ March 2026) and evaluated strictly on subsequent, non-overlapping transitions (April $\to$ May 2026).</li>
+      <ul class="check-list">
+        <li><em>Staleness Test:</em> Pages unedited for &ge;180 days exhibited a <strong>47.1% decline rate</strong> ($n=174$) vs. <strong>54.2%</strong> for fresh pages ($n=29,826$). <strong>Verdict: OPPOSITE/MIXED</strong>.</li>
+        <li><em>CTR vs. Position Tier Test:</em> Pages with CTR below their position tier average exhibited a <strong>57.7% decline rate</strong> ($n=23,735$) vs. <strong>40.9%</strong> for above-average pages ($n=6,265$). <strong>Verdict: CONFIRMED</strong>.</li>
       </ul>
+      <p>
+        The baseline score was defined as:
+        $$\text{Baseline Action Score} = \mathbb{I}(\text{CTR} &lt; \text{Tier Avg CTR}) \times \mathbb{I}(\text{impressions\_90d} \ge 500) \times \text{impressions\_90d}$$
+      </p>
 
-      <div class="callout warning">
-        <div class="callout-icon">⚠️</div>
-        <div>
-          <strong>Note on Leakage Check Scope:</strong> In the initial project phase, dedicated standalone leakage-check and signal-audit notebooks (ML-05 and ML-06) were not formally completed. However, inline feature auditing during ML-08 confirmed that label sources (<code>trend_direction</code> and <code>trend_pct</code>) were strictly excluded from model feature sets. Longitudinal auditing in ML-09 subsequently uncovered a critical near-leakage autocorrelation ($r = 0.819$), detailed below.
-        </div>
+      <h3 class="sub-heading">3. Forward-Looking Warehouse Model &amp; Time-Aware Validation (ML-09)</h3>
+      <p>
+        To address the limitation of current-window proxy targets, we constructed a genuinely forward-looking model on 78.8M warehouse facts:
+        $$\text{declined} = \mathbb{I}(\text{future\_avg\_position}_{M+1} &gt; \text{avg\_position}_{M})$$
+        We compared a naive random split (pooling February and April 2026 data) against an <strong>honest time-aware split</strong> (training on February&rarr;March outcomes, testing strictly on April&rarr;May outcomes).
+      </p>
+      <div class="callout callout-info">
+        <strong>Methodological Note:</strong> Dedicated standalone leakage check and signal audit notebooks (ML-05/ML-06) were not completed as separate deliverables; all leakage checks were conducted inline during ML-04, ML-08, and ML-09.
       </div>
     </section>
 
     <!-- Section 5: Results -->
-    <section id="results">
-      <h2><span class="section-num">05.</span> Empirical Results Across All Three Phases</h2>
+    <section class="paper-section" id="results">
+      <h2 class="section-heading"><span class="section-num">5.</span> Results &amp; Empirical Findings</h2>
 
-      <h3>Phase 1: Current-Window Classifier Benchmarks (ML-08)</h3>
+      <h3 class="sub-heading">Phase 1 (ML-08): Starter Dataset Model Comparison</h3>
       <p>
-        Models were evaluated on the 7 held-out clients (6,163 rows; test base decline rate = 0.511). Logistic Regression emerged as the superior ranking mechanism, especially at the top of the queue:
+        On the client-holdout test set (6,163 pages, 7 held-out clients, base rate = 0.511), we compared the baseline rule against Logistic Regression and a Random Forest classifier:
       </p>
 
-      <div class="table-wrapper">
-        <table>
+      <div class="table-container">
+        <table class="data-table">
           <thead>
             <tr>
-              <th>Method / Model</th>
+              <th>Method</th>
               <th>Precision@20</th>
               <th>Precision@50</th>
               <th>Test Base Rate</th>
-              <th>Relative Lift (@P50)</th>
+              <th>Lift over Base Rate (P@20)</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Baseline Rule</strong> (Volume-Weighted)</td>
+              <td><strong>Baseline Rule</strong></td>
               <td>0.400</td>
               <td>0.420</td>
               <td>0.511</td>
-              <td><span class="badge badge-danger">-17.8% vs Base Rate</span></td>
+              <td>0.78&times; (Below base rate)</td>
             </tr>
             <tr>
-              <td><strong>Logistic Regression</strong> (Selected)</td>
-              <td><strong>0.700</strong></td>
-              <td><strong>0.600</strong></td>
-              <td>0.511</td>
-              <td><span class="badge badge-success">+42.9% vs Baseline</span></td>
-            </tr>
-            <tr>
-              <td><strong>Random Forest</strong> (200 trees, depth 6)</td>
+              <td><strong>Random Forest Classifier</strong></td>
               <td>0.500</td>
               <td>0.580</td>
               <td>0.511</td>
-              <td><span class="badge badge-primary">+38.1% vs Baseline</span></td>
+              <td>0.98&times;</td>
+            </tr>
+            <tr class="highlight-row">
+              <td><strong>Logistic Regression (Winner)</strong></td>
+              <td><strong>0.700</strong></td>
+              <td><strong>0.600</strong></td>
+              <td>0.511</td>
+              <td><strong>1.37&times; (+30.0 pp over baseline)</strong></td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="figure-container">
-        <img src="img/ml08_model_precision_comparison.png" alt="Model vs Baseline Precision at K Comparison" class="figure-img">
-        <div class="figure-caption">
-          <strong>Figure 1: Client-Holdout Precision@K Comparison.</strong> Logistic Regression achieved a Precision@20 of 0.700 (14/20 true decliners) and Precision@50 of 0.600 on unseen clients, significantly outperforming both the naive baseline rule (P@50 = 0.420) and the test cohort base rate (0.511).
-        </div>
+      <div class="figure-card">
+        <img src="img/figure1_precision_at_k.svg" alt="Precision@K Model Comparison">
+        <div class="figure-caption"><strong>Figure 1:</strong> Precision@K comparison on client-holdout test split (6,163 rows, 7 clients). Logistic Regression delivers a +30.0 percentage point lift in Precision@20 over the heuristic baseline.</div>
       </div>
 
       <p>
-        <strong>Feature Coefficients & Model Disagreement:</strong> Logistic Regression assigned the largest negative weight to <code>ctr</code> ($-0.0528$), indicating that underperforming CTR is the primary linear signal of current decline. Conversely, Random Forest placed 53.1% of its total split importance on raw scale features: <code>impressions_90d</code> (0.303) and <code>avg_position</code> (0.228).
+        <strong>Feature Driver Analysis:</strong> Logistic Regression leaned primarily on <code class="inline-code">ctr</code> (coefficient -0.0528, lower CTR &rarr; higher decline risk) and <code class="inline-code">days_since_last_update</code> (+0.0058). In contrast, Random Forest prioritized <code class="inline-code">impressions_90d</code> (30.3% importance) and <code class="inline-code">avg_position</code> (22.8% importance), assigning <code class="inline-code">ctr</code> only 5.5% importance. Logistic Regression's simpler linear structure generalized better to unseen clients.
       </p>
 
-      <hr style="border: none; border-top: 1px solid var(--border); margin: 2.5rem 0;">
-
-      <h3>Phase 2: Longitudinal Warehouse Validation & Model Collapse (ML-09)</h3>
+      <h3 class="sub-heading">Phase 2 (ML-09): Forward-Looking Model Failure &amp; Kill Decision</h3>
       <p>
-        To verify whether this predictive capability translates to forecasting future performance, we scaled to the 78.8M-row warehouse and tested a forward-looking model (predicting whether a page's average position worsens in the subsequent month).
+        When evaluating the predictive forward-looking model on the full warehouse, the results diverged dramatically between validation regimes:
       </p>
 
-      <div class="figure-container">
-        <img src="img/ml09_validation_audit_drop.png" alt="Validation Accuracy Collapse under Honest Time-Aware Split" class="figure-img">
-        <div class="figure-caption">
-          <strong>Figure 2: Out-of-Time Validation Failure.</strong> Under a naive random split, the predictive model appeared viable (66.9% accuracy). Under an honest time-aware split (trained Feb$\to$Mar, tested Apr$\to$May), accuracy collapsed to 27.4%—substantially worse than majority-class baseline guessing.
-        </div>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Validation Regime</th>
+              <th>Evaluation Strategy</th>
+              <th>Observed Accuracy</th>
+              <th>Operational Verdict</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Naive Random Split</strong></td>
+              <td>Pooled Feb &amp; Apr facts, 70/30 stratified split</td>
+              <td><strong>66.9%</strong></td>
+              <td>Misleadingly optimistic (temporal data leakage)</td>
+            </tr>
+            <tr class="danger-row">
+              <td><strong>Honest Time-Aware Split</strong></td>
+              <td>Train: Feb&rarr;Mar | Test: Apr&rarr;May</td>
+              <td><strong>27.4%</strong></td>
+              <td><strong>Model Failed &rarr; KILLED &amp; EXCLUDED</strong></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <p>
-        <strong>The Near-Leakage Audit Finding:</strong> Investigating the root cause of this failure revealed that <code>avg_position</code> exhibited an <strong>$r = 0.819$ correlation</strong> with the target outcome variable <code>future_avg_position</code>.
-      </p>
-
-      <div class="figure-container">
-        <img src="img/ml09_leakage_correlation.png" alt="Near-Leakage Feature Correlation with Target" class="figure-img">
-        <div class="figure-caption">
-          <strong>Figure 3: Feature Autocorrelation Audit.</strong> Historical search position ($r = 0.819$) overwhelmed all other behavioral features (e.g., word count $r=0.215$, CTR $r=-0.209$, staleness $r=0.145$). The model learned an autocorrelative shortcut that collapsed when ranking distributions shifted between quarterly seasons.
-        </div>
+      <div class="figure-card">
+        <img src="img/figure2_validation_audit.svg" alt="Validation Audit Collapse">
+        <div class="figure-caption"><strong>Figure 2:</strong> Model accuracy collapsed from 66.9% to 27.4% under honest out-of-period testing due to a near-leakage autocorrelation trap ($r = 0.819$ between <code class="inline-code">avg_position</code> and future position).</div>
       </div>
 
-      <div class="callout danger">
-        <div class="callout-icon">🛑</div>
-        <div>
-          <strong>Architectural Decision — Model Killed:</strong> Because the predictive time-series model failed honest out-of-time validation and was compromised by position autocorrelation, <em>the forward-looking model was permanently killed and disqualified from production deployment</em>.
-        </div>
+      <div class="callout callout-danger">
+        <strong>The Autocorrelation Trap:</strong> Feature correlation audits revealed that <code class="inline-code">avg_position</code> had an <strong>0.819 correlation</strong> with <code class="inline-code">future_avg_position</code>. Because the target label was formulated as whether position worsened relative to the feature period, the classifier learned a mechanical shortcut that collapsed under quarterly macroeconomic and distribution shifts. Following honest engineering practice, this predictive model was <strong>killed and discarded</strong> rather than deployed.
       </div>
 
-      <hr style="border: none; border-top: 1px solid var(--border); margin: 2.5rem 0;">
-
-      <h3>Phase 3: The Deployed Action Playbook (ML-10)</h3>
+      <h3 class="sub-heading">Phase 3 (ML-10): Deployed Production Playbook</h3>
       <p>
-        Following the disqualification of the uncalibrated predictive model, the final deployed system utilizes an interpretable, re-validated prioritization score built on confirmed empirical relationships:
+        Because the predictive model failed honest validation, Phase 3 deployed an interpretable, re-validated action scoring formula over the March 2026 warehouse dataset:
+        $$\text{Score} = \text{avg\_impressions} \times \left(\frac{\text{days\_since\_update}}{365.0}\right) / (\text{avg\_ctr} + 0.005)$$
+      </p>
+      <p>
+        The policy filtered for mature content ($\ge 90$ days old) with meaningful exposure ($\ge 20$ average daily impressions), producing a <strong>59-page triage queue</strong>:
       </p>
 
-      <div class="formula-card">
-        Priority Score = (Avg_Impressions × (Days_Since_Update / 365)) / (Avg_CTR + 0.005)
-      </div>
-
-      <p>
-        Applied to the March 2026 warehouse partition (`month=2026-03`), the system generated an actionable triage queue of <strong>59 high-priority refresh candidates</strong> classified by clear reason codes:
-      </p>
-
-      <div class="figure-container">
-        <img src="img/w07_reason_code_breakdown.png" alt="Ranked Queue Reason Code Breakdown" class="figure-img">
-        <div class="figure-caption">
-          <strong>Figure 4: Action Queue Composition (March 2026).</strong> 47 pages (79.7%) were flagged under <code>STALE_LOW_CTR</code> (extended staleness with depressed CTR), while 12 pages (20.3%) were flagged under <code>PAGE1_LOW_CTR</code> (Page 1 visibility ranking 1–10 with sub-0.5% CTR).
-        </div>
+      <div class="figure-card">
+        <img src="img/figure3_reason_code_distribution.svg" alt="Reason Code Distribution">
+        <div class="figure-caption"><strong>Figure 3:</strong> Breakdown of the 59 candidate pages produced by the deployed action playbook across verified reason codes.</div>
       </div>
     </section>
 
-    <!-- Section 6: Limitations & Honest Framing -->
-    <section id="limitations">
-      <h2><span class="section-num">06.</span> Limitations & Honest Framing</h2>
+    <!-- Section 6: Limitations -->
+    <section class="paper-section" id="limitations">
+      <h2 class="section-heading"><span class="section-num">6.</span> Limitations &amp; Honest Framing</h2>
       <p>
-        Trust in machine learning systems is earned by explicitly stating what the evidence cannot prove. This work operates under the following structural constraints:
+        To maintain scientific integrity, the findings of this study must be interpreted within their explicit methodological bounds:
       </p>
-      <ol>
-        <li><strong>Correlational, Non-Causal Nature:</strong> All metrics reflect observational associations in historical GSC and GA4 tracking logs. Flagging a page for refresh does not guarantee rank recovery; causal impact can only be established through randomized prospective A/B content refresh experiments.</li>
-        <li><strong>No Temporal Invariance Guarantee for Current-Window Models:</strong> While Logistic Regression achieved strong Precision@50 (0.600) on held-out clients, it was validated within a single 90-day snapshot. As demonstrated in ML-09, tabular ranking relationships are subject to seasonal concept drift.</li>
-        <li><strong>Limited Client Diversity in Starter Slice:</strong> The 30,000-page dataset represents 32 enterprise clients. Although grouped splitting prevented client memorization, cohort-level domain bias cannot be ruled out.</li>
-        <li><strong>Granularity Disconnect:</strong> The starter slice utilizes 90-day static aggregations, whereas the warehouse provides daily granularity. Static rates obscure intra-quarter decay velocities.</li>
-        <li><strong>Absence of Semantic and SERP Context:</strong> Tabular features contain no qualitative data regarding content quality, topical depth, search intent shifts, Google algorithm updates, or competitor publication velocity.</li>
-        <li><strong>Autocorrelation Vulnerability:</strong> Search position is naturally persistent ($r = 0.819$). Models formulated to predict position deltas are prone to exploiting mechanical headroom bounds rather than true content decay dynamics.</li>
+      <ol class="num-list">
+        <li><strong>Correlational, Not Causal:</strong> All discovered relationships represent statistical associations in historical search logs. We cannot claim that updating a page will causally reverse traffic decline without controlled A/B experimentation.</li>
+        <li><strong>Proxy Target Limitations:</strong> The ML-08 model scores a current-window decline bucket (<code class="inline-code">trend_direction == "down"</code>), serving as an operational triage indicator rather than a guaranteed forward forecast.</li>
+        <li><strong>Temporal Non-Stationarity:</strong> The ML-09 predictive model failure underscores that search performance features do not maintain stable forward predictive validity across long temporal horizons without continuous retraining.</li>
+        <li><strong>Systematic Missingness in Engagement:</strong> GA4 analytics tracking was present on only 4.2% of March 2026 warehouse rows. Models must rely primarily on GSC search signals and treat missing engagement as unobserved rather than zero.</li>
+        <li><strong>Position Tier Skew:</strong> Tier-average CTR baselines can be distorted by high-traffic outlier pages, occasionally flagging healthy pages in top positions as underperformers.</li>
       </ol>
     </section>
 
     <!-- Section 7: Ranked Recommendations -->
-    <section id="recommendations">
-      <h2><span class="section-num">07.</span> Ranked Recommendations & Operational Protocol</h2>
+    <section class="paper-section" id="recommendations">
+      <h2 class="section-heading"><span class="section-num">7.</span> Ranked Recommendations &amp; Action Playbook</h2>
+      <p>
+        The production action playbook outputs a prioritized 59-page triage queue paired with specific editorial action mandates:
+      </p>
 
-      <h3>7.1 Deployed Action Playbook Summary</h3>
-      <div class="table-wrapper">
-        <table>
+      <div class="table-container">
+        <table class="data-table">
           <thead>
             <tr>
               <th>Reason Code</th>
-              <th>Trigger Criteria</th>
-              <th>Queue Share</th>
-              <th>Recommended Editorial Action</th>
+              <th>Candidate Count</th>
+              <th>Trigger Condition</th>
+              <th>Mandated Human Action</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><code>PAGE1_LOW_CTR</code></td>
-              <td>Avg Position &le; 10<br>Avg CTR &lt; 0.50%</td>
-              <td>12 pages (20.3%)</td>
-              <td><strong>SERP Snippet Optimization:</strong> Rewrite meta titles, improve H1 hooks, add schema markup, and address search intent mismatches to capture available impressions.</td>
+              <td><code class="inline-code">STALE_LOW_CTR</code></td>
+              <td>47 pages (79.7%)</td>
+              <td>Aged content (&ge;90d), impressions &ge;20, low click-through rate relative to exposure.</td>
+              <td>Evaluate content freshness, update outdated statistics/examples, and expand thin sections.</td>
             </tr>
             <tr>
-              <td><code>STALE_LOW_CTR</code></td>
-              <td>Days Since Update &ge; 90<br>Depressed CTR / Visibility</td>
-              <td>47 pages (79.7%)</td>
-              <td><strong>Comprehensive Content Refresh:</strong> Update outdated statistics, expand thin sections, refresh internal links, and prune dead references.</td>
+              <td><code class="inline-code">PAGE1_LOW_CTR</code></td>
+              <td>12 pages (20.3%)</td>
+              <td>Average position &le; 10 on Google, but CTR &lt; 0.5%.</td>
+              <td>Rewrite page title and meta description; optimize search snippet to better match search intent.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3>7.2 Human Review Protocol</h3>
-      <p>
-        Prior to modifying any flagged URL, human editors must execute the following 4-step checklist:
-      </p>
-      <ul>
-        <li><strong>Step 1 (Strategic Relevance):</strong> Confirm the page aligns with current commercial offerings and is not scheduled for deprecation.</li>
-        <li><strong>Step 2 (Active Edit Check):</strong> Verify that the URL is not already undergoing staging revisions.</li>
-        <li><strong>Step 3 (Anomaly Isolation):</strong> Check whether recent traffic dips stem from technical site bugs or broad seasonal cycles rather than content staleness.</li>
-        <li><strong>Step 4 (Tracking Integrity):</strong> Verify that GA4/GSC tracking tags on the client domain are firing reliably.</li>
+      <h3 class="sub-heading">Operational Human Triage Protocol</h3>
+      <ul class="check-list">
+        <li><strong>Verification Step 1:</strong> Reviewers must open the live URL to confirm business relevance and ensure the page is not scheduled for retirement.</li>
+        <li><strong>Verification Step 2:</strong> Check for concurrent site edits or recent URL migrations to prevent duplicate effort.</li>
+        <li><strong>Verification Step 3:</strong> Rule out external anomalies (e.g., site-wide tracking drops, seasonal demand troughs).</li>
       </ul>
 
-      <h3>7.3 Operational No-Go List</h3>
-      <ul>
-        <li>❌ <strong>Never auto-publish AI-generated content</strong> without human editorial review and fact-checking.</li>
-        <li>❌ <strong>Never auto-delete or de-index</strong> pages based solely on triage scores.</li>
-        <li>❌ <strong>Never promise client-facing traffic guarantees</strong> based on prioritization ranks.</li>
-        <li>❌ <strong>Never deploy uncalibrated outputs</strong> from the retired ML-09 predictive model.</li>
-      </ul>
-
-      <h3>7.4 Monitoring & Retraining Triggers</h3>
-      <p>
-        To prevent silent failure, the prioritization queue is monitored against the warehouse distribution:
-      </p>
-      <div class="callout info">
-        <div class="callout-icon">📊</div>
-        <div>
-          <strong>Signal Health Benchmark (May 2026 Audit):</strong> In warehouse testing, Page 1 URLs captured an average CTR of <strong>0.50% (n = 1,935,904)</strong> versus <strong>0.21% (n = 2,437,518)</strong> for sub-Page 1 URLs. If this CTR distribution gap narrows significantly in future months, the rule must be recalibrated.
-        </div>
+      <div class="callout callout-warning">
+        <strong>The Human No-Go Boundary (Strict Rules):</strong>
+        <ul style="margin-top:8px; margin-left:20px;">
+          <li>Never auto-publish AI-generated rewrites without human editorial sign-off.</li>
+          <li>Never auto-delete or de-index candidate URLs based solely on algorithmic priority scores.</li>
+          <li>Never quote predictive revenue guarantees to stakeholders based on decision-support rankings.</li>
+        </ul>
       </div>
     </section>
 
     <!-- Section 8: Reproducibility -->
-    <section id="reproducibility">
-      <h2><span class="section-num">08.</span> Reproducibility</h2>
+    <section class="paper-section" id="reproducibility">
+      <h2 class="section-heading"><span class="section-num">8.</span> Reproducibility &amp; Artifact Receipts</h2>
       <p>
-        All experiments, splits, models, and data audits are fully open-source and reproducible from the repository notebooks:
+        All experiments, metrics, and figures in this paper are deterministic and fully reproducible from the code repository:
       </p>
-      <ul>
-        <li><strong>Code Repository:</strong> <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter" target="_blank" rel="noopener noreferrer">https://github.com/EimanZahra1472/flyrank-ml-internship-starter</a></li>
-        <li><strong>Capstone Notebook:</strong> <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter/blob/main/work/notebooks/capstone.ipynb" target="_blank" rel="noopener noreferrer"><code>work/notebooks/capstone.ipynb</code></a></li>
-        <li><strong>Baseline & Audit Notebooks:</strong> <code>w01_research_question.ipynb</code> through <code>w07_action_playbook.ipynb</code></li>
-        <li><strong>Environment Stack:</strong> Python 3.10+, <code>scikit-learn 1.3+</code>, <code>pandas 2.0+</code>, <code>duckdb 0.9+</code>, <code>matplotlib 3.7+</code>. Fixed random seed: <code>42</code>.</li>
+      <ul class="check-list">
+        <li><strong>Repository:</strong> <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter" target="_blank">github.com/EimanZahra1472/flyrank-ml-internship-starter</a></li>
+        <li><strong>Random Seed:</strong> Fixed to <code class="inline-code">42</code> across all data splits and model initializations.</li>
+        <li><strong>Software Environment:</strong> Python 3.10+, DuckDB 1.0+, scikit-learn 1.3+, pandas 2.0+, matplotlib 3.7+.</li>
       </ul>
-      
-      <div class="code-block">
-# Reproduce the primary client-holdout benchmark
-git clone https://github.com/EimanZahra1472/flyrank-ml-internship-starter.git
-cd flyrank-ml-internship-starter
-pip install -r requirements.txt
-python -c "import json; print('Ready to run capstone.ipynb')"
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Notebook Stage</th>
+              <th>Assignment Card</th>
+              <th>Primary Output / Committed Receipt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w01_research_question.ipynb</code></td>
+              <td>ML-02</td>
+              <td>Research question, decision context, base decline rate (54.2%).</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w02_ml_task_framing.ipynb</code></td>
+              <td>ML-03</td>
+              <td>Ranking/scoring task formulation, Precision@50 metric definition.</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w03_data_contract.ipynb</code></td>
+              <td>ML-04</td>
+              <td>Warehouse grain verification (9.84M March rows), scale-masking leakage demonstration.</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w04_baseline_score.ipynb</code></td>
+              <td>ML-07</td>
+              <td>Baseline score construction, signal audits, top-20 review (<code class="inline-code">work/outputs/baseline_action_score.csv</code>).</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w05_model.ipynb</code></td>
+              <td>ML-08</td>
+              <td>Client-holdout model evaluation (LogReg P@20=0.700 vs. Baseline 0.400).</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w06_validation_audit.ipynb</code></td>
+              <td>ML-09</td>
+              <td>Time-aware split audit (66.9% &rarr; 27.4%), 0.819 autocorrelation trap identification.</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/w07_action_playbook.ipynb</code></td>
+              <td>ML-10</td>
+              <td>59-page queue generation, reason code distribution (<code class="inline-code">work/outputs/w07_metrics.json</code>).</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">work/notebooks/capstone.ipynb</code></td>
+              <td>ML-11</td>
+              <td>Complete synthesized notebook and ML-12 deliverables.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <!-- Section 9: Acknowledgments & Data Credit -->
-    <section id="acknowledgments">
-      <h2><span class="section-num">09.</span> Acknowledgments & Data Credit</h2>
+    <section class="paper-section" id="acknowledgments">
+      <h2 class="section-heading"><span class="section-num">9.</span> Acknowledgments &amp; Data Credit</h2>
       <p>
-        This research was conducted as part of the Applied Search Intelligence Track.
+        This research was conducted as part of the FlyRank Applied Search Intelligence Machine Learning Internship.
       </p>
-      <div class="callout info">
-        <div class="callout-icon">🔗</div>
-        <div>
-          <strong>Data Attribution:</strong> Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai" target="_blank" rel="noopener noreferrer" style="color: #0369a1; font-weight: 700;">https://flyrank.ai</a>.
-        </div>
-      </div>
+      <p style="font-size: 1.05rem; font-weight: 500; color: var(--text-primary);">
+        Built on the FlyRank ML Internship dataset &mdash; <a href="https://flyrank.ai" target="_blank" rel="noopener noreferrer" style="color: var(--primary-600); text-decoration: underline;">https://flyrank.ai</a>
+      </p>
     </section>
-  </main>
+
+  </article>
 
   <!-- Footer -->
-  <footer>
-    <div class="footer-content">
-      <p>© 2026 Eiman Zahra. Published under MIT License. All data governed by FlyRank Data Use Agreement.</p>
-      <div class="footer-links">
-        <a href="https://flyrank.ai" target="_blank" rel="noopener noreferrer">FlyRank AI</a>
-        <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-        <a href="#top">Back to Top ↑</a>
-      </div>
+  <footer class="paper-footer">
+    <div>&copy; 2026 Eiman Zahra &bull; FlyRank Applied Search Intelligence Internship &bull; All Rights Reserved</div>
+    <div style="margin-top: 8px;">
+      <a href="https://github.com/EimanZahra1472/flyrank-ml-internship-starter" target="_blank">GitHub Workspace</a> &bull;
+      <a href="https://flyrank.ai" target="_blank">FlyRank Data Platform</a>
     </div>
   </footer>
+
+</div>
 
 </body>
 </html>

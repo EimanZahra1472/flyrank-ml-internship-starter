@@ -1,0 +1,28 @@
+{
+  "starter_dataset": {
+    "rows": 30000,
+    "clients": 32,
+    "base_rate": 0.542
+  },
+  "starter_model_eval": {
+    "test_rows": 6163,
+    "test_clients": 7,
+    "test_base_rate": 0.511,
+    "baseline_p20": 0.4,
+    "baseline_p50": 0.42,
+    "logreg_p20": 0.7,
+    "logreg_p50": 0.6,
+    "rf_p20": 0.5,
+    "rf_p50": 0.58
+  },
+  "warehouse_forward_eval": {
+    "naive_random_accuracy": 0.669,
+    "honest_time_aware_accuracy": 0.274,
+    "position_autocorrelation": 0.819
+  },
+  "deployed_queue": {
+    "total_candidates": 59,
+    "stale_low_ctr": 47,
+    "page1_low_ctr": 12
+  }
+}

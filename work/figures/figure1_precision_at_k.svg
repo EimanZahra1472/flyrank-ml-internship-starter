@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Title & Subtitle -->
+  <text x="40" y="45" font-size="20" font-weight="700" fill="#1e293b">Model Performance vs. Baseline on Client-Holdout Test Split</text>
+  <text x="40" y="70" font-size="13" fill="#64748b">Test Set: 6,163 pages across 7 held-out clients | Target: is_declining_label (Base Rate = 0.511)</text>
+
+  <!-- Grid Lines -->
+  <line x1="120" y1="360" x2="740" y2="360" stroke="#e2e8f0" stroke-width="1.5" />
+  <line x1="120" y1="290" x2="740" y2="290" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4" />
+  <line x1="120" y1="220" x2="740" y2="220" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4" />
+  <line x1="120" y1="150" x2="740" y2="150" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4" />
+
+  <!-- Y Axis Labels -->
+  <text x="105" y="365" font-size="12" fill="#64748b" text-anchor="end">0.0</text>
+  <text x="105" y="295" font-size="12" fill="#64748b" text-anchor="end">0.25</text>
+  <text x="105" y="225" font-size="12" fill="#64748b" text-anchor="end">0.50</text>
+  <text x="105" y="155" font-size="12" fill="#64748b" text-anchor="end">0.75</text>
+
+  <!-- Base Rate Reference Line -->
+  <!-- 0.511 corresponds to y = 360 - (0.511 / 0.75 * 210) = 360 - 143.08 = 216.92 -->
+  <line x1="120" y1="217" x2="740" y2="217" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,4" />
+  <rect x="620" y="202" width="115" height="22" rx="4" fill="#fee2e2" />
+  <text x="677" y="217" font-size="11" font-weight="600" fill="#b91c1c" text-anchor="middle">Base Rate (0.511)</text>
+
+  <!-- GROUP 1: Precision@20 -->
+  <!-- Baseline Rule: 0.400 -> height = 0.400/0.75 * 210 = 112, y = 248 -->
+  <rect x="170" y="248" width="55" height="112" rx="4" fill="#94a3b8" />
+  <text x="197" y="240" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">0.400</text>
+
+  <!-- Random Forest: 0.500 -> height = 0.500/0.75 * 210 = 140, y = 220 -->
+  <rect x="235" y="220" width="55" height="140" rx="4" fill="#3b82f6" />
+  <text x="262" y="212" font-size="12" font-weight="600" fill="#1d4ed8" text-anchor="middle">0.500</text>
+
+  <!-- Logistic Regression: 0.700 -> height = 0.700/0.75 * 210 = 196, y = 164 -->
+  <rect x="300" y="164" width="55" height="196" rx="4" fill="#059669" />
+  <text x="327" y="154" font-size="13" font-weight="700" fill="#047857" text-anchor="middle">0.700 ★</text>
+
+  <text x="262" y="388" font-size="14" font-weight="600" fill="#1e293b" text-anchor="middle">Precision@20</text>
+  <text x="262" y="405" font-size="11" fill="#64748b" text-anchor="middle">(Top 20 Review Queue)</text>
+
+  <!-- GROUP 2: Precision@50 -->
+  <!-- Baseline Rule: 0.420 -> height = 0.420/0.75 * 210 = 117.6, y = 242.4 -->
+  <rect x="490" y="242" width="55" height="118" rx="4" fill="#94a3b8" />
+  <text x="517" y="234" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">0.420</text>
+
+  <!-- Random Forest: 0.580 -> height = 0.580/0.75 * 210 = 162.4, y = 197.6 -->
+  <rect x="555" y="198" width="55" height="162" rx="4" fill="#3b82f6" />
+  <text x="582" y="190" font-size="12" font-weight="600" fill="#1d4ed8" text-anchor="middle">0.580</text>
+
+  <!-- Logistic Regression: 0.600 -> height = 0.600/0.75 * 210 = 168, y = 192 -->
+  <rect x="620" y="192" width="55" height="168" rx="4" fill="#059669" />
+  <text x="647" y="184" font-size="13" font-weight="700" fill="#047857" text-anchor="middle">0.600 ★</text>
+
+  <text x="582" y="388" font-size="14" font-weight="600" fill="#1e293b" text-anchor="middle">Precision@50</text>
+  <text x="582" y="405" font-size="11" fill="#64748b" text-anchor="middle">(Top 50 Review Queue)</text>
+
+  <!-- Legend -->
+  <g transform="translate(190, 435)">
+    <rect x="0" y="0" width="14" height="14" rx="2" fill="#94a3b8" />
+    <text x="22" y="12" font-size="12" fill="#475569">Baseline Rule</text>
+
+    <rect x="140" y="0" width="14" height="14" rx="2" fill="#3b82f6" />
+    <text x="162" y="12" font-size="12" fill="#475569">Random Forest</text>
+
+    <rect x="290" y="0" width="14" height="14" rx="2" fill="#059669" />
+    <text x="312" y="12" font-size="12" font-weight="600" fill="#047857">Logistic Regression (Winner)</text>
+  </g>
+</svg>

@@ -5,11 +5,15 @@
 - **Repo:** [https://github.com/EimanZahra1472/flyrank-ml-internship-starter](https://github.com/EimanZahra1472/flyrank-ml-internship-starter)
 - **Date:** August 2026
 
+---
+
 ## 0. Abstract
 
 Prioritizing content inventory for manual editorial refresh under finite operational capacity requires identifying pages experiencing real performance decline without wasting review bandwidth on healthy URLs. Using an anonymized 30,000-page dataset across 32 enterprise clients alongside a 78.8M-row daily performance warehouse from FlyRank, we evaluated rule-based heuristics, current-window classifiers, and forward-looking time-series predictive models. In client-holdout validation on the 30K dataset, Logistic Regression achieved a Precision@20 of 0.700 and Precision@50 of 0.600 against a base decline rate of 0.511, outperforming a volume-weighted baseline rule (Precision@20 = 0.400, Precision@50 = 0.420). However, when evaluating a forward-looking predictive model on the full warehouse, honest time-aware validation caused accuracy to collapse from 0.669 (naive random split) to 0.274, exacerbated by severe autocorrelation (r = 0.819) between historical position and the target outcome. Consequently, we rejected the predictive model for deployment, implementing instead an evidence-backed, transparent action playbook with structured reason codes (`STALE_LOW_CTR` and `PAGE1_LOW_CTR`) to govern human-in-the-loop content refresh queues safely.
 
-## 1. Problem framing
+---
+
+## 1. Problem Framing
 
 - **Decision Supported:** Identifying which pages in an enterprise content inventory should be audited and refreshed first given strict editorial bandwidth constraints (typically 20–50 pages per weekly cycle).
 - **Unit of Analysis:** One row = one content item (page) over 90-day search performance windows.
@@ -17,77 +21,91 @@ Prioritizing content inventory for manual editorial refresh under finite operati
 - **Action Taken:** Human editors inspect flagged pages, identify causes for underperformance (e.g., outdated content vs. sub-optimal SERP snippets), and execute updates.
 - **Cost of a Wrong Call:** 
   - *False Positive:* Wastes high-cost editorial hours on pages that are already holding steady in SERPs.
-  - *False Negative:* Leaves high-potential declining pages decaying unnoticed until ranking recovery requires extensive structural overhauls.
-- **Why ML / Data Helps:** Hand-written rules fall into scale traps (e.g., ranking purely by volume) or single-variable blind spots. Combining multi-dimensional observable signals improves triage precision at the top of the queue.
+  - *False Negative:* Leaves high-volume declining assets undetected, resulting in compounding traffic loss.
+- **Metric Selection:** Precision@K (Precision@20, Precision@50) evaluated directly against the task base rate.
 
-## 2. Data safety
+---
+
+## 2. Data Safety
 
 - **Data Sources:** 
-  1. `data/raw/content_refresh_anonymized.csv` (30,000 pages, 32 clients, 44 columns).
-  2. `FlyRank/internship-warehouse` (`fact_content_daily_performance`, 78.8M rows, 28.9M GSC-active rows; `dim_content`).
-- **Deliberate Exclusions & Safety:**
-  - Zero client names, domains, URLs, titles, keywords, or raw query text. All entities are pseudonymous hashes.
-  - Hashed IDs (`client_id`, `content_id`) were used strictly for joins and grouped holdout splitting—never as model features.
-  - Target-derived columns (`trend_direction`, `trend_pct`) were strictly excluded from model feature sets to prevent circular data leakage.
-- **Sanitization Confirmation:** No private client identifiers or unapproved data dumps exist anywhere in the repository or report.
+  1. `data/raw/content_refresh_anonymized.csv`: 30,000 rows & 44 columns across 32 clients.
+  2. `FlyRank/internship-warehouse`: 78.8M daily fact performance records and 519K dim_content entities.
+- **Deliberate Exclusions & Hygiene:**
+  - `trend_direction` and `trend_pct` were barred from model feature sets as they directly derive the decline label.
+  - Identifiers (`client_id`, `content_id`, `keyword_hash_id`) were strictly isolated for grouping and joins.
+  - Excluded AI sessions (`sessions_ai`) from classifier inputs due to high sparsity (0.04% presence).
+- **Leakage Audits:**
+  - ML-04 demonstrated scale-masking risks: regularized linear models masked leaky features until standardized (AUC jump from 0.802 to 0.999).
+  - Anonymization verified: zero client names, domains, or raw search queries present anywhere in `work/` or `docs/`.
 
-## 3. Baseline
+---
 
-- **Rule Logic:** `Baseline Score = (CTR < Position_Tier_Mean_CTR) × (Impressions_90d >= 500) × Impressions_90d`
-- **Why It's a Fair Comparison:** Represents the standard practitioner heuristic of prioritizing high-volume pages with below-average CTR for their ranking position tier.
-- **Baseline Benchmark Numbers (on client-holdout test split, 6,163 rows, 7 clients, base rate = 0.511):**
-  - **Precision@20:** 0.400 (8 / 20)
-  - **Precision@50:** 0.420 (21 / 50)
-  - *Note:* The baseline underperforms the random base rate because multiplying by raw impressions heavily biases the queue toward page size rather than true decline probability.
+## 3. Baseline Rule
 
-## 4. Model / analysis
+We established a transparent heuristic score combining volume gating and position-tier relative performance:
+$$\text{Baseline Score} = \mathbb{I}(\text{CTR} < \text{Tier Avg CTR}) \times \mathbb{I}(\text{impressions\_90d} \ge 500) \times \text{impressions\_90d}$$
 
-- **Methods Benchmarked:** Logistic Regression and Random Forest (200 estimators, max_depth=6, class_weight='balanced').
-- **Feature Set:** `impressions_90d`, `avg_position`, `ctr`, `content_age_days`, `days_since_last_update`, `word_count`, `sessions_90d`, `engagement_rate`.
-- **Target Proxy (Current-Window):** `is_declining_label = (trend_direction == "down")` (1 = declining, 0 = stable/up).
+- **Signal Audit Findings:**
+  - *Staleness Signal (`days_since_last_update >= 180`):* Stale pages exhibited a 47.1% decline rate vs. 54.2% for fresh pages (**Verdict: MIXED/OPPOSITE**).
+  - *CTR Under-Performance vs. Tier:* Pages below tier average CTR had a 57.7% decline rate vs. 40.9% for above-tier (**Verdict: CONFIRMED**).
+- **Baseline Performance:** On the test set, Precision@20 = 0.400, Precision@50 = 0.420 (below the 0.511 base rate due to volume-weight bias).
+
+---
+
+## 4. Model / Analysis
+
+- **Task Formulation:** Scoring pages for decline probability on the client-holdout split (80/20 GroupShuffleSplit, 25 train clients, 7 test clients, 0 overlap).
+- **Feature Set (8 features):** `impressions_90d`, `avg_position`, `ctr`, `content_age_days`, `days_since_last_update`, `word_count`, `sessions_90d`, `engagement_rate`.
+- **Target Definition:** `is_declining_label = (trend_direction == 'down')`.
+
+---
 
 ## 5. Evaluation
 
-- **Split Design:** Grouped client holdout via `GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)` ensuring 25 training clients (23,837 rows) and 7 test clients (6,163 rows) with zero client overlap.
-- **Benchmark Results on Same Test Split:**
-  - **Baseline Rule:** Precision@20 = 0.400, Precision@50 = 0.420
-  - **Logistic Regression (Winner):** Precision@20 = 0.700, Precision@50 = 0.600 (+42.9% lift over baseline at P@50)
-  - **Random Forest:** Precision@20 = 0.500, Precision@50 = 0.580
-  - **Test Cohort Base Rate:** 0.511
-- **Error Analysis:**
-  - False positives in Logistic Regression clustered in two categories:
-    1. Ultra-low-volume pages where near-zero CTR reflects sparse sampling noise rather than true decline.
-    2. Low-tier ranking positions (positions 30+) where low CTR is structurally expected rather than a symptom of decay.
+### Test Split Results (n=6,163, Base Rate = 0.511)
 
-## 6. Interpretation & Longitudinal Failure Audit
+| Model / Baseline | Precision@20 | Precision@50 | Lift (P@20) |
+| :--- | :---: | :---: | :---: |
+| Baseline Rule | 0.400 | 0.420 | 0.78x |
+| Random Forest Classifier | 0.500 | 0.580 | 0.98x |
+| **Logistic Regression (Winner)** | **0.700** | **0.600** | **1.37x (+30.0 pp)** |
 
-- **Feature Weights in Current-Window Classifier:**
-  - Logistic Regression: CTR had the largest negative coefficient ($-0.0528$), confirming that relative CTR underperformance is the strongest linear decline indicator.
-  - Random Forest: Leaned heavily on `impressions_90d` (0.303) and `avg_position` (0.228).
-- **Longitudinal Warehouse Audit (ML-09):**
-  - Evaluating a forward-looking predictive model on 78.8M warehouse facts across consecutive quarters revealed severe out-of-time breakdown:
-    - *Naive Random Split:* Accuracy = 0.669
-    - *Honest Time-Aware Split (Feb→Mar train, Apr→May test):* Accuracy = **0.274** (worse than majority-class guessing).
-  - *Near-Leakage Autocorrelation Finding:* `avg_position` exhibited an $r = 0.819$ correlation with `future_avg_position`. The model learned an autocorrelative shortcut that failed when quarterly SERP dynamics shifted.
-  - *Decision:* The predictive forward-looking model was **killed** and disqualified from deployment.
+- **Warehouse Forward Model (ML-09):**
+  - Naive Random Split: 66.9% accuracy.
+  - Honest Time-Aware Split (Feb->Mar train, Apr->May test): **27.4% accuracy** (collapsed).
+  - Autocorrelation finding: $r = 0.819$ between `avg_position` and future position created a fragile shortcut that failed out-of-period. **Model killed.**
+
+---
+
+## 6. Interpretation
+
+- Logistic Regression outperformed Random Forest by maintaining strong linear penalty on low `ctr` (coef = -0.0528) and moderate penalty on staleness (+0.0058), avoiding overfitting to client-specific impression magnitudes.
+- The forward modeling failure demonstrated that past position stability does not forecast quarterly inflection points.
+
+---
 
 ## 7. Recommendation & Action Playbook
 
-- **Deployed System:** Because the predictive model failed longitudinal validation, the production action playbook uses a re-validated, transparent prioritization score on warehouse data:
-  $$\text{Priority Score} = \frac{\text{Avg Impressions} \times (\text{Days Since Update} / 365)}{\text{Avg CTR} + 0.005}$$
-- **Action Queue Breakdown (March 2026 snapshot, 59 pages):**
-  - **`STALE_LOW_CTR` (47 pages / 79.7%):** Aged content with depressed CTR requiring thorough editorial update.
-  - **`PAGE1_LOW_CTR` (12 pages / 20.3%):** Page 1 ranking pages (positions 1–10) capturing below 0.50% CTR requiring SERP snippet and title optimization.
-- **Human-in-the-Loop Protocol:** Mandatory human verification of page relevance, ongoing staging edits, technical anomaly checks, and tracking tag health before executing refreshes.
-- **Operational No-Go List:** No auto-publishing, no automated page pruning, and no client-facing traffic guarantees.
+Deployed an interpretable, re-validated action scoring formula over the March 2026 warehouse dataset, outputting a 59-page actionable triage queue:
+- **`STALE_LOW_CTR` (47 pages / 79.7%):** Aged content receiving impressions but suffering low click-through rates.
+- **`PAGE1_LOW_CTR` (12 pages / 20.3%):** Top-10 ranking pages on Google with CTR < 0.5%, indicating sub-optimal SERP snippets.
+
+### Human No-Go Boundary
+- Never auto-publish unreviewed AI rewrites.
+- Never auto-delete or de-index candidate URLs based solely on algorithmic priority scores.
+- Never quote predictive revenue guarantees to stakeholders based on decision-support rankings.
+
+---
 
 ## 8. Reproducibility
 
 - **Repository:** `https://github.com/EimanZahra1472/flyrank-ml-internship-starter`
-- **Notebooks:** `work/notebooks/capstone.ipynb` runs top-to-bottom error-free and reproduces all numbers.
-- **Receipts:** `work/outputs/w07_metrics.json` records metrics and queue counts.
-- **Random Seed:** Fixed to `42` throughout all splits and model initializations.
+- **Random Seed:** `42` across all splits and models.
+- **Environment:** `python>=3.10`, `duckdb>=1.0.0`, `scikit-learn>=1.3.0`, `pandas>=2.0.0`, `matplotlib>=3.7.0`.
 
-## 9. Acknowledgments & data credit
+---
+
+## 9. Acknowledgments & Data Credit
 
 Built on the FlyRank ML Internship dataset — [https://flyrank.ai](https://flyrank.ai)
