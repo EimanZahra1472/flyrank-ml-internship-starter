@@ -1,0 +1,12 @@
+{
+  "n_ranked": 59,
+  "reason_code_counts": {
+    "STALE_LOW_CTR": 47,
+    "PAGE1_LOW_CTR": 12
+  },
+  "month_used": "2026-03",
+  "signal1_staleness_verdict": "MIXED",
+  "signal2_ctr_position_verdict": "CONFIRMED",
+  "predictive_model_status": "FAILED_HONEST_VALIDATION",
+  "predictive_model_note": "Accuracy dropped 0.669 -> 0.274 under time-aware split; excluded from this playbook"
+}
